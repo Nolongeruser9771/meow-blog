@@ -1,6 +1,6 @@
 # meow-blog
 
-Live demo: comming soon
+Live demo: comming soon <br />
 Docker compose: coming soon
 
 ## Skills
