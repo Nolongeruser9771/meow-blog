@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="vi" dir="auto" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/layout :: main-fragment(~{:: title}, ~{}, ~{:: main}, ~{:: #js})}">>
+    <head>
+        <title>Search | Kong's Blog</title>
+    </head>
+
+    <body class="list" id="top">
+        <main class="main">
+            <header class="page-header">
+                <h1>
+                    Search
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="28"
+                        height="28"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentcolor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                    >
+                        <circle cx="11" cy="11" r="8" />
+                        <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                    </svg>
+                </h1>
+                <div class="post-description">Tìm kiếm bài viết</div>
+                <div class="post-meta"></div>
+            </header>
+            <div id="searchbox">
+                <input
+                    id="searchInput"
+                    autofocus
+                    placeholder="Tìm kiếm bài viết"
+                    type="search"
+                    autocomplete="off"
+                />
+                <ul id="searchResults"></ul>
+            </div>
+        </main>
+    <script th:inline="javascript" id="js">
+        //lấy searchValue
+        const searchInput = document.getElementById('searchInput');
+        console.log(searchInput)
+        searchInput.addEventListener('change', (event) => {
+            //xóa tìm kiếm trước
+            const searchResult = document.getElementById('searchResults');
+            searchResult.innerHTML = "";
+
+            const searchValue = event.target.value;
+            console.log(searchValue);
+
+            //call API
+            const searchFetch = async (searchValue) => {
+                try {
+                    const search = await fetch(`/search/?search=${searchValue}`)
+                    if (search.ok) {
+                        const res = await search.json();
+                        console.log(res)
+
+                        if (res.length === 0) {
+                            searchResult.insertAdjacentHTML("beforeend", `
+                            <li className="post-entry">
+                                <a>Không có bài viết phù hợp</a>
+                            </li>`);
+                        } else {
+                            //insert into html
+                            for (let i = 0; i < res.length; i++) {
+                                searchResult.insertAdjacentHTML("beforeend", `
+                            <li class="post-entry">
+                                <header className="entry-header">
+                                    ${res[i].title}&nbsp;»
+                                </header>
+                                <a
+                                    href="/blogs/${res[i].id}/${res[i].slug}"
+                                    aria-label=${res[i].title}
+                                ></a>
+                            </li>`)
+                            }
+                        }
+                    }
+                } catch (e) {
+                    console.log(e);
+                }
+            }
+            searchFetch(searchValue);
+        });
+    </script>
+    </body>
+</html>

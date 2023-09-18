@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="https://www.thymeleaf.org"
+      th:replace="~{/layout/layout-admin :: main-fragment(~{:: title}, ~{}, ~{:: .content-wrapper}, ~{})}">
+
+<head>
+    <title>Tất cả bài viết</title>
+</head>
+
+<body>
+<div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-12">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item">
+                            <a href="#">Dashboard</a>
+                        </li>
+                        <li class="breadcrumb-item active">
+                            Danh sách bài viết
+                        </li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main content -->
+    <section class="content">
+        <div class="container-fluid">
+            <div class="row py-2">
+                <div class="col-12">
+                    <button type="button" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Viết bài
+                    </button>
+                    <button type="button" class="btn btn-info">
+                        <i class="fas fa-redo"></i> Refresh
+                    </button>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <table class="table table-bordered table-hover">
+                                <thead>
+                                <tr>
+                                    <th>Tiêu đề</th>
+                                    <th>Tác giả</th>
+                                    <th>Danh mục</th>
+                                    <th>Trạng thái</th>
+                                    <th>Ngày tạo</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <th:block th:with="blogList = ${page.getContent()}">
+                                    <tr th:each="blog: ${blogList}">
+                                        <td>
+                                            <a th:href="@{/admin/blogs/{blogId}/detail(blogId = ${blog.id})}" th:text="${blog.title}"></a>
+                                        </td>
+                                        <td>
+                                            <a href="#" th:text="${blog.user.name}"></a>
+                                        </td>
+                                        <td >
+                                            <span th:each="category: ${blog.categories}" th:text="${category.name}" class="badge bg-info mr-1"></span>
+                                        </td>
+                                        <td th:text="${blog.status ? 'Công khai': 'Nháp'}"></td>
+                                        <td th:text="${#temporals.format(blog.createdAt, 'dd/MM/yyyy')}">06-07-2022</td>
+                                    </tr>
+                                </th:block>
+                                </tbody>
+                            </table>
+
+                            <div class="d-flex justify-content-center mt-3" id="pagination">
+                                <ul class="pagination mb-0">
+                                    <!--Previous Page-->
+                                    <li class="paginate_button page-item previous" th:classappend="${currentPage == 1? 'disabled':''}"
+                                        id="example2_previous">
+                                        <th:block th:if="${currentPage == 2}">
+                                            <a th:href="@{/admin/blogs}"aria-controls="example2" data-dt-idx="0" tabindex="0" class="page-link">Previous</a>
+                                        </th:block>
+                                        <th:block th:if="${currentPage != 2}">
+                                            <a th:href="@{/admin/blogs?page={previousPage}(previousPage=${currentPage -1})}"aria-controls="example2" data-dt-idx="0" tabindex="0" class="page-link">Previous</a>
+                                        </th:block>
+                                    </li>
+                                    <!--Page Number-->
+                                    <th:block th:with="numbers = ${T(com.example.blogbackend.utils.Utils).createList(page.getTotalPages())}">
+                                        <li th:each="number : ${numbers}" class="paginate_button page-item" th:classappend="${number == currentPage? 'active': ''}">
+                                            <th:block th:if="${number == 1}">
+                                                <a th:href="@{/admin/blogs}" aria-controls="example2" data-dt-idx="1" tabindex="0"
+                                                   class="page-link" th:text="${number}"></a>
+                                            </th:block>
+                                            <th:block th:if="${number != 1}">
+                                                <a th:href="@{/admin/blogs?page={pageNumber}(pageNumber=${number})}" aria-controls="example2" data-dt-idx="1" tabindex="0"
+                                                   class="page-link" th:text="${number}"></a>
+                                            </th:block>
+                                        </li>
+                                    </th:block>
+                                    <!--Next Page-->
+                                    <li class="paginate_button page-item next" th:classappend="${currentPage == page.getTotalPages ? 'disabled':''}"
+                                        id="example2_next">
+                                        <a th:href="@{/admin/blogs?page={nextPage}(nextPage=${currentPage + 1})}" aria-controls="example2" data-dt-idx="7" tabindex="0"
+                                           class="page-link">Next</a>
+                                    </li>
+                                    <!--Thử sử dụng js để call api -> trả dữ liệu về và append lại vào list-->
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+</body>
+
+</html>

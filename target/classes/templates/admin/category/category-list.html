@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="https://www.thymeleaf.org"
+      th:replace="~{/layout/layout-admin :: main-fragment(~{:: title}, ~{::#css}, ~{:: .content-wrapper}, ~{::#javascript})}">
+
+<head>
+    <title>Danh mục</title>
+    <!--Pagination CSS-->
+    <th:block id="css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/paginationjs/2.6.0/pagination.min.css"
+              integrity="sha512-K1k7jSn9RDKEcn/ugqVVvWYu0bcS3q1w6m/5pQSnrj0bCfIqF6Wk49lkmckSb4wglvTP9V17LtS0q0XxYccXbg=="
+              crossorigin="anonymous" referrerpolicy="no-referrer"/>
+    </th:block>
+</head>
+
+<body>
+<div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-12">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item">
+                            <a href="#">Dashboard</a>
+                        </li>
+                        <li class="breadcrumb-item active">
+                            Tất cả danh mục
+                        </li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main content -->
+    <section class="content">
+        <div class="container-fluid">
+            <div class="row py-2">
+                <div class="col-12">
+                    <button type="button" class="btn btn-primary" id="btn-category-add" onclick="categoryAdd()">
+                        <i class="fas fa-plus"></i> Tạo danh mục
+                    </button>
+                    <button type="button" class="btn btn-info">
+                        <i class="fas fa-redo"></i> Refresh
+                    </button>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <table class="table table-bordered table-hover">
+                                <thead>
+                                <tr>
+                                    <th>STT</th>
+                                    <th>Danh mục</th>
+                                    <th></th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <th:block th:with="categories = ${categoryList.getContent()}">
+                                    <tr th:each="category: ${categories}" th:id=|category-${category.id}|>
+                                        <td th:text="${category.id}"></td>
+                                        <td class="category-name" th:text="${category.name}"></td>
+                                        <td>
+                                            <button class="btn btn-warning" id="btn-category-update" th:onclick="categoryUpdate([[${category.id}]], [[${category.name}]])">Sửa</button>
+                                            <button class="btn btn-danger" id="btn-category-delete" th:onclick="categoryDelete([[${category.id}]])">Xóa</button>
+                                        </td>
+                                    </tr>
+                                </th:block>
+                                </tbody>
+                            </table>
+
+                            <div class="d-flex justify-content-center mt-3" id="pagination">
+                                <ul class="pagination mb-0">
+                                    <!--Previous Page-->
+                                    <li class="paginate_button page-item previous" th:classappend="${currentPage == 1? 'disabled':''}"
+                                        id="example2_previous">
+                                        <th:block th:if="${currentPage == 2}">
+                                            <a th:href="@{/admin/categories}"aria-controls="example2" data-dt-idx="0" tabindex="0" class="page-link">Previous</a>
+                                        </th:block>
+                                        <th:block th:if="${currentPage != 2}">
+                                            <a th:href="@{/admin/categories?page={previousPage}(previousPage=${currentPage -1})}"aria-controls="example2" data-dt-idx="0" tabindex="0" class="page-link">Previous</a>
+                                        </th:block>
+                                    </li>
+                                    <!--Page Number-->
+                                    <th:block th:with="numbers = ${T(com.example.blogbackend.utils.Utils).createList(categoryList.getTotalPages())}">
+                                        <li th:each="number : ${numbers}" class="paginate_button page-item" th:classappend="${number == currentPage? 'active': ''}">
+                                            <th:block th:if="${number == 1}">
+                                                <a th:href="@{/admin/categories}" aria-controls="example2" data-dt-idx="1" tabindex="0"
+                                                   class="page-link" th:text="${number}"></a>
+                                            </th:block>
+                                            <th:block th:if="${number != 1}">
+                                                <a th:href="@{/admin/categories?page={pageNumber}(pageNumber=${number})}" aria-controls="example2" data-dt-idx="1" tabindex="0"
+                                                   class="page-link" th:text="${number}"></a>
+                                            </th:block>
+                                        </li>
+                                    </th:block>
+                                    <!--Next Page-->
+                                    <li class="paginate_button page-item next" th:classappend="${currentPage == categoryList.getTotalPages ? 'disabled':''}"
+                                        id="example2_next">
+                                        <a th:href="@{/admin/categories?page={nextPage}(nextPage=${currentPage + 1})}" aria-controls="example2" data-dt-idx="7" tabindex="0"
+                                           class="page-link">Next</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+<!--JS-->
+<script id="javascript">
+    //Sửa thông tin
+    function categoryUpdate(categoryId, categoryName){
+        //Lấy ra category id
+        console.log(categoryId);
+
+        //Nhập thông tin request
+        const nameUpdateRequest = window.prompt("Insert new category name: ", categoryName);
+        console.log(nameUpdateRequest);
+        if (nameUpdateRequest!== null && nameUpdateRequest!=="" && nameUpdateRequest!== 'undefined') {
+
+            //Fetch request
+            const requestFetch = async () => {
+                try {
+                    const request = await fetch(`/api/v1/admin/categories/${categoryId}`, {
+                        method: "PUT",
+                        headers: {
+                            'Content-Type' : 'application/json; charset=utf-8'
+                        },
+                        body: JSON.stringify(nameUpdateRequest)
+                    });
+                    const res = await request.json();
+                    console.log(res);
+                    if (!res.status) {
+                        //Hiển thị trên giao diện:
+                        const category2Update = document.getElementById('category-' + categoryId).querySelector('.category-name');
+                        category2Update.innerText = res.name;
+                        return;
+                    }
+                    toastr.error(res.message + ". Cannot rename!");
+                } catch (e) {
+                    console.log(e);
+                }};
+            requestFetch();
+        }}
+
+    //Thêm category
+    async function categoryAdd(){
+        const newCategoryRequest = window.prompt("Enter new category name: ");
+        if (newCategoryRequest!==null && newCategoryRequest!== "" && newCategoryRequest!== 'undefined') {
+            try {
+                const addRequest = await fetch('/api/v1/admin/categories', {
+                    method: "POST",
+                    headers: {
+                        'Content-Type' : 'application/json; charset=utf-8'
+                    },
+                    body: JSON.stringify(newCategoryRequest)
+                })
+                const newCategory = await addRequest.json();
+                if (!newCategory.status) {
+                    //Xử lí hiển thị ------------->
+                    //Truy cập vào phần tử cha chứa categoryList
+                    const tbodyEl = document.querySelector('tbody');
+                    const newCategoryEl = `
+                        <tr id="category-${newCategory.id}">
+                             <td>${newCategory.id}</td>
+                             <td class="category-name">${newCategory.name}</td>
+                             <td>
+                                  <button class="btn btn-warning" id="btn-category-update" onclick="categoryUpdate(${newCategory.id})">Sửa</button>
+                                  <button class="btn btn-danger" id="btn-category-delete" onclick="categoryDelete(${newCategory.id})">Xóa</button>
+                             </td>
+                        </tr>
+                    `
+                    //add vào list
+                    tbodyEl.insertAdjacentHTML('beforeend', newCategoryEl);
+
+                    toastr.success('Add category successfully');
+                    return;
+                }
+                toastr.error(newCategory.message + ". Please check your request again.")
+            } catch (e) {
+                console.log(e);
+            }
+        }
+    }
+
+    //Xóa category
+    async function categoryDelete(categoryId){
+        //Truy cập vào phần tử muốn xóa
+        const category2Delete = document.getElementById('category-'+categoryId);
+        console.log(category2Delete);
+
+        //confirm delete
+        const confirm = window.confirm("Do you want to delete this category?");
+        if (!confirm) {return};
+
+        //Kiểm tra used của category
+        try {
+            const validateRequest = await fetch(`/api/v1/admin/category/${categoryId}`)
+            const res = await validateRequest.json();
+            console.log(res)
+            if (res === 0) {
+               //Call api delete
+                try {
+                    const deleteRequest = await fetch(`/api/v1/admin/categories/${categoryId}`, {method: "DELETE"})
+                    if (deleteRequest.ok) {
+                        //Xứ lí hiển thị ------>
+                        category2Delete.parentElement.removeChild(category2Delete);
+                        toastr.success("Delete category successfully");
+                        return;
+                    }
+                    toastr.error(res.status + "Failed to delete category");
+                } catch (e) {
+                    console.log(e);
+                }
+                return;
+            }
+            toastr.warning("There are " + res +" blogs using this category. Cannot delete.");
+        } catch (e) {
+            console.log(e)
+        }
+    }
+</script>
+</body>
+
+</html>

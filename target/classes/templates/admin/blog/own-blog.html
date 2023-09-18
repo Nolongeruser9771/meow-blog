@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="https://www.thymeleaf.org"
+      th:replace="~{/layout/layout-admin :: main-fragment(~{:: title}, ~{:: #css}, ~{:: .content-wrapper}, ~{:: #javascript})}">
+
+<head>
+    <title>Bài viết của tôi</title>
+
+    <!--Pagination CSS-->
+    <th:block id="css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/paginationjs/2.6.0/pagination.min.css"
+              integrity="sha512-K1k7jSn9RDKEcn/ugqVVvWYu0bcS3q1w6m/5pQSnrj0bCfIqF6Wk49lkmckSb4wglvTP9V17LtS0q0XxYccXbg=="
+              crossorigin="anonymous" referrerpolicy="no-referrer"/>
+    </th:block>
+</head>
+
+<body>
+<div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-12">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item">
+                            <a href="#">Dashboard</a>
+                        </li>
+                        <li class="breadcrumb-item active">
+                            Bài viết của tôi
+                        </li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main content -->
+    <section class="content">
+        <div class="container-fluid">
+            <div class="row py-2">
+                <div class="col-12">
+                    <button type="button" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Viết bài
+                    </button>
+                    <button type="button" class="btn btn-info">
+                        <i class="fas fa-redo"></i> Refresh
+                    </button>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <table class="table table-bordered table-hover">
+                                <thead>
+                                <tr>
+                                    <th>Tiêu đề</th>
+                                    <th>Danh mục</th>
+                                    <th>Trạng thái</th>
+                                    <th>Ngày tạo</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                </tbody>
+                            </table>
+
+                            <div class="d-flex justify-content-center mt-3" id="pagination">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+<!--js-->
+<th:block id="javascript">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/paginationjs/2.6.0/pagination.min.js" integrity="sha512-GzbaI5EsNzdEUq6/2XLYpr1y9CUZRIVsUeWTAFgULtQa5jZ3Nug8i0nZKM6jp9NffBCZhymPPQFcF0DK+JkRpw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script th:inline="javascript">
+        //Lưu lại thông tin blogList
+        const blogList = /*[[${blogList}]]*/;
+        console.log(blogList)
+
+        //Hiển thị danh sách blog
+        const tbodyEl = document.querySelector('tbody');
+        function renderBlogs(blogList){
+            //xóa nội dung đang có
+            tbodyEl.innerHTML ="";
+
+            //Tạo nội dung (bản chất là cộng chuỗi)
+            let htmlEl = "";
+            blogList.forEach(blog => {
+                htmlEl+= `
+                <tr>
+                     <td>
+                         <a href="/admin/blogs/${blog.id}/detail">${blog.title}</a>
+                     </td>
+                     <td>
+                         ${blog.categories.map(category => {
+                            return `<span class="badge bg-info mr-1">${category.name}</span>`
+                        }).join("")}
+
+                     </td>
+                     <td>${blog.status ? 'Công khai' : 'Nháp'}</td>
+                     <td>${blog.createdAt}</td>
+                </tr>`
+            })
+            console.log(htmlEl)
+
+            //Insert nội dung
+            tbodyEl.innerHTML = htmlEl;
+        }
+
+        //Hiển thị phân trang
+        function renderPagination(){
+            $('#pagination').pagination({
+                dataSource: blogList,
+            callback: function(data, pagination) {
+                //hiển thị blogs dựa trên data trả về
+                renderBlogs(data);
+            }
+        })}
+        renderPagination();
+        //Xử lí đường dẫn + format date
+    </script>
+</th:block>
+</body>
+
+</html>

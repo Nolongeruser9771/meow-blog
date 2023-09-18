@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/layout :: main-fragment(~{:: title}, ~{}, ~{:: main}, ~{})}">>
+
+<head>
+    <title th:text="|Tag: ${categoryName}|"></title>
+</head>
+
+<body class="list" id="top">
+    <main class="main">
+        <header class="entry-header">
+            <h1 style="margin-bottom: 1rem;">Tag : <span th:text="${categoryName}"></span></h1>
+        </header>
+        <article class="post-entry" th:each="blog: ${blogList}">
+            <header class="entry-header">
+                <h2 th:text="${blog.title}"></h2>
+            </header>
+            <div class="entry-content">
+                <p th:text="${blog.description}"></p>
+            </div>
+            <footer class="entry-footer">
+                <span th:text="${#temporals.format(blog.publishedAt, 'dd/MM/yyyy')}"></span>
+            </footer>
+            <a class="entry-link"
+               th:href="@{/blogs/{id}/{slug}(id=${blog.id}, slug=${blog.slug})}"></a>
+        </article>
+    </main>
+</body>
+
+</html>
